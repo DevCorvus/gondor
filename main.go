@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/DevCorvus/gondor/features/healthcheck"
+	"github.com/DevCorvus/gondor/api/healthcheck"
 	"github.com/gofiber/fiber/v2"
 )
 
