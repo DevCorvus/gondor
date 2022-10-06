@@ -1,6 +1,7 @@
 package database
 
 import (
+	"github.com/DevCorvus/gondor/database/migrations"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
@@ -11,6 +12,8 @@ func initDatabase() *gorm.DB {
 	if err != nil {
 		panic(err)
 	}
+
+	migrations.Run(db)
 
 	return db
 }
