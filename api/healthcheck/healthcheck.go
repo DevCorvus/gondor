@@ -8,7 +8,6 @@ func RegisterHandlers(app *fiber.App, version string) {
 
 func healthcheck(version string) func(*fiber.Ctx) error {
 	return func(c *fiber.Ctx) error {
-		c.Status(fiber.StatusOK)
-		return c.SendString(version)
+		return c.Status(fiber.StatusOK).SendString(version)
 	}
 }
