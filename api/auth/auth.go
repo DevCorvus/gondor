@@ -43,8 +43,7 @@ func login(c *fiber.Ctx) error {
 		return c.SendStatus(fiber.StatusNotFound)
 	}
 
-	// TODO: Compare password hash
-	if body.Password != user.Password {
+	if !user.ComparePassword(body.Password) {
 		return c.SendStatus(fiber.StatusUnauthorized)
 	}
 

@@ -38,7 +38,12 @@ func addUser(c *fiber.Ctx) error {
 		return c.SendStatus(fiber.StatusConflict)
 	}
 
-	// TODO: Hash password before
+	hashedPassword, err := utils.HashPassword(user.Password)
+	if err != nil {
+		return c.SendStatus(fiber.StatusInternalServerError)
+	}
+	user.Password = hashedPassword
+
 	if result := db.Create(&user); result.Error != nil {
 		return c.SendStatus(fiber.StatusInternalServerError)
 	}
