@@ -10,8 +10,8 @@ import (
 
 var db = database.Conn
 
-func RegisterHandlers(app *fiber.App) {
-	router := app.Group("/users")
+func RegisterHandlers(r fiber.Router) {
+	router := r.Group("/users")
 
 	router.Post("/", create)
 }
@@ -20,13 +20,10 @@ func create(c *fiber.Ctx) error {
 	var user models.User
 
 	if err := c.BodyParser(&user); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": err.Error(),
-		})
+		return c.SendStatus(fiber.StatusBadRequest)
 	}
 
-	errors := utils.ValidateStruct(user)
-	if errors != nil {
+	if errors := utils.ValidateStruct(user); errors != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(errors)
 	}
 

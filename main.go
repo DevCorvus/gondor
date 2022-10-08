@@ -1,18 +1,38 @@
 package main
 
 import (
-	"github.com/DevCorvus/gondor/api/healthcheck"
-	"github.com/DevCorvus/gondor/api/users"
+	"time"
+
+	"github.com/DevCorvus/gondor/routes"
+
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cache"
+	"github.com/gofiber/fiber/v2/middleware/encryptcookie"
+	"github.com/gofiber/fiber/v2/middleware/etag"
+	"github.com/gofiber/fiber/v2/middleware/limiter"
+	"github.com/gofiber/fiber/v2/middleware/logger"
 )
 
-var version = "0.1.0"
-
 func main() {
+	// Init
 	app := fiber.New()
 
-	users.RegisterHandlers(app)
-	healthcheck.RegisterHandlers(app, version)
+	// Middlewares
+	app.Use(limiter.New(limiter.Config{
+		Max:        1,
+		Expiration: time.Second,
+	}))
+	app.Use(logger.New())
+	app.Use(cache.New())
+	app.Use(etag.New())
+	app.Use(encryptcookie.New(encryptcookie.Config{
+		Key: encryptcookie.GenerateKey(), // Use a fixed one in production
+	}))
 
+	// Routes
+	api := app.Group("/api")
+	routes.SetupV1(api)
+
+	// Run
 	app.Listen(":8080")
 }
