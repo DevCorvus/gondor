@@ -6,7 +6,6 @@ import (
 	"github.com/DevCorvus/gondor/routes"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/cache"
 	"github.com/gofiber/fiber/v2/middleware/encryptcookie"
 	"github.com/gofiber/fiber/v2/middleware/etag"
 	"github.com/gofiber/fiber/v2/middleware/limiter"
@@ -23,7 +22,6 @@ func main() {
 		Expiration: time.Second,
 	}))
 	app.Use(logger.New())
-	app.Use(cache.New())
 	app.Use(etag.New())
 	app.Use(encryptcookie.New(encryptcookie.Config{
 		Key: encryptcookie.GenerateKey(), // Use a fixed one in production
