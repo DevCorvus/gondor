@@ -1,6 +1,9 @@
 package utils
 
-import "github.com/go-playground/validator/v10"
+import (
+	"github.com/go-playground/validator/v10"
+	"golang.org/x/crypto/bcrypt"
+)
 
 type errorResponse struct {
 	Field    string
@@ -23,4 +26,12 @@ func ValidateStruct[T any](s T) []*errorResponse {
 		}
 	}
 	return errors
+}
+
+func HashPassword(password string) (string, error) {
+	passwordBytes := []byte(password)
+
+	hashedPasswordBytes, err := bcrypt.GenerateFromPassword(passwordBytes, bcrypt.DefaultCost)
+
+	return string(hashedPasswordBytes), err
 }
