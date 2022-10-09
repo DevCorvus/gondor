@@ -2,6 +2,7 @@ package auth
 
 import (
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/DevCorvus/gondor/database"
@@ -9,6 +10,7 @@ import (
 	"github.com/DevCorvus/gondor/middlewares"
 	"github.com/DevCorvus/gondor/utils"
 	"github.com/gofiber/fiber/v2"
+	"github.com/golang-jwt/jwt/v4"
 )
 
 var db = database.Conn
@@ -18,6 +20,8 @@ func RegisterHandlers(r fiber.Router) {
 
 	router.Post("/login", login)
 	router.Post("/logout", middlewares.UserIsAuthenticated, logout)
+	router.Get("/token", middlewares.UserIsAuthenticated, getToken)
+	router.Get("/verify-token", middlewares.UserIsAuthenticated, verifyToken)
 }
 
 type loginRequest struct {
@@ -63,4 +67,54 @@ func login(c *fiber.Ctx) error {
 func logout(c *fiber.Ctx) error {
 	c.ClearCookie("session")
 	return c.SendStatus(fiber.StatusNoContent)
+}
+
+// This shouldn't be in source code
+var secretKey = []byte("ultra-secret-key")
+
+func getToken(c *fiber.Ctx) error {
+	userId := c.Cookies("session")
+
+	claims := &jwt.RegisteredClaims{
+		Issuer:    userId,
+		ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Minute * 10)),
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+
+	signedString, err := token.SignedString(secretKey)
+	if err != nil {
+		return c.SendStatus(fiber.StatusInternalServerError)
+	}
+
+	return c.JSON(fiber.Map{
+		"token": signedString,
+	})
+}
+
+// This could be a middleware
+func verifyToken(c *fiber.Ctx) error {
+	header := c.Get("Authorization")
+	if header == "" {
+		return c.SendStatus(fiber.StatusBadRequest)
+	}
+
+	fields := strings.Fields(header) // Split by white space
+	if len(fields) != 2 || fields[0] != "Bearer" {
+		return c.SendStatus(fiber.StatusBadRequest)
+	}
+
+	signedString := fields[1]
+
+	token, err := jwt.ParseWithClaims(signedString, &jwt.RegisteredClaims{}, func(t *jwt.Token) (any, error) {
+		return secretKey, nil
+	})
+
+	if err != nil {
+		return c.SendStatus(fiber.StatusUnauthorized)
+	}
+
+	claims := token.Claims.(*jwt.RegisteredClaims)
+
+	return c.JSON(claims)
 }
