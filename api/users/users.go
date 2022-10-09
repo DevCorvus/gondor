@@ -33,8 +33,7 @@ func addUser(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(errors)
 	}
 
-	result := db.First(&models.User{}, "email = ?", user.Email)
-	if result.RowsAffected > 0 {
+	if result := db.First(&models.User{}, "email = ?", user.Email); result.RowsAffected > 0 {
 		return c.SendStatus(fiber.StatusConflict)
 	}
 

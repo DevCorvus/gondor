@@ -41,9 +41,7 @@ func login(c *fiber.Ctx) error {
 	}
 
 	var user models.User
-	result := db.First(&user, "email = ?", body.Email)
-
-	if result.Error != nil {
+	if result := db.First(&user, "email = ?", body.Email); result.Error != nil {
 		return c.SendStatus(fiber.StatusNotFound)
 	}
 
