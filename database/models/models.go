@@ -15,6 +15,7 @@ type User struct {
 	CreatedAt time.Time       `json:"createdAt"`
 	UpdatedAt time.Time       `json:"updatedAt"`
 	DeletedAt *gorm.DeletedAt `json:"deletedAt" gorm:"index"`
+	Gophers   []Gopher        `json:"gophers"`
 }
 
 func (user User) ComparePassword(password string) bool {
@@ -24,4 +25,15 @@ func (user User) ComparePassword(password string) bool {
 	err := bcrypt.CompareHashAndPassword(hashedPasswordBytes, passwordBytes)
 
 	return err == nil
+}
+
+type Gopher struct {
+	ID        uint            `json:"id" gorm:"primarykey"`
+	Name      string          `json:"name" validate:"required,min=2,max=100"`
+	Color     string          `json:"color" validate:"required,hexcolor"`
+	Age       uint8           `json:"age" validate:"required,gt=0,lte=7"`
+	CreatedAt time.Time       `json:"createdAt"`
+	UpdatedAt time.Time       `json:"updatedAt"`
+	DeletedAt *gorm.DeletedAt `json:"deletedAt" gorm:"index"`
+	UserID    uint            `json:"userId"`
 }
