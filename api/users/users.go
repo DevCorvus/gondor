@@ -43,7 +43,7 @@ func addUser(c *fiber.Ctx) error {
 	}
 	user.Password = hashedPassword
 
-	if result := db.Create(&user); result.Error != nil {
+	if result := db.Omit("Gophers").Create(&user); result.Error != nil {
 		return c.SendStatus(fiber.StatusInternalServerError)
 	}
 
