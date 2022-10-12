@@ -98,6 +98,11 @@ func updateUser(c *fiber.Ctx) error {
 func deleteUser(c *fiber.Ctx) error {
 	userId := c.Cookies("session")
 
+	// Deleting by OnDelete:CASCADE constraint or Select(clauses.Associations) doesn't seem to work so...
+	// This is not the best solution but it works:
+	if result := db.Delete(&models.Gopher{}, "user_id = ?", userId); result.Error != nil {
+		return c.SendStatus(fiber.StatusInternalServerError)
+	}
 	if result := db.Delete(&models.User{}, userId); result.Error != nil {
 		return c.SendStatus(fiber.StatusInternalServerError)
 	}
